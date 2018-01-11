@@ -66,8 +66,8 @@ class StoVolaMoMsc(object):
         cholesky_mat = np.linalg.cholesky(corr_mat)  # 进行cholesky变换
         ran_mat = npr.standard_normal((2, self.M, self.I))  # 生成随机数
         # 应用方差缩减
+        ran_mat[0] = (ran_mat[0] - np.mean(ran_mat[0])) / np.std(ran_mat[0])
         ran_mat[1] = (ran_mat[1] - np.mean(ran_mat[1])) / np.std(ran_mat[1])
-        ran_mat[2] = (ran_mat[2] - np.mean(ran_mat[2])) / np.std(ran_mat[2])
         for t in range(self.M):
             ran_mat[t] = np.dot(cholesky_mat, ran_mat[:, t, :])
         return ran_mat
