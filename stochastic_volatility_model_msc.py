@@ -56,7 +56,6 @@ class StoVolaMoMsc(object):
         self.rho = rho
         self.K = K
         self.M = get_workday(startdate, enddate)
-        self.payoff_func = payoff_func
         self.dt = 1 / 252
         self.I = 100000
     
