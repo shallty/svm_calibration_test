@@ -68,9 +68,10 @@ class StoVolaMoMsc(object):
         # 应用方差缩减
         ran_mat[0] = (ran_mat[0] - np.mean(ran_mat[0])) / np.std(ran_mat[0])
         ran_mat[1] = (ran_mat[1] - np.mean(ran_mat[1])) / np.std(ran_mat[1])
+        ran_corr = np.zeros_like(ran_mat)
         for t in range(self.M):
-            ran_mat[t] = np.dot(cholesky_mat, ran_mat[:, t, :])
-        return ran_mat
+            ran_corr[:, t, :] = np.dot(cholesky_mat, ran_mat[:, t, :])
+        return ran_corr
     
     def get_option_price(self):
         ''' 产生期权价格。'''
