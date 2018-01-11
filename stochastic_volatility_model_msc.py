@@ -85,7 +85,7 @@ class StoVolaMoMsc(object):
             for t in range(self.M):
                 ran = self.get_random()[:, t, :]
                 V[t + 1] = (V[t] + (self.kappa_v * (self.theta_v - V[t]) * dt + 
-                 self.sigma_v * np.sqrt(V[t]) * np.sqrt[dt] * ran[1]))
+                 self.sigma_v * np.sqrt(V[t]) * np.sqrt(dt) * ran[1]))
                 S[t + 1] = S[t] * np.exp((self.r - 0.5 * V[t]) *dt +
                  V[t] * np.sqrt(dt) * ran[0])
             op = (np.exp(-self.r * dt * self.M) * 
