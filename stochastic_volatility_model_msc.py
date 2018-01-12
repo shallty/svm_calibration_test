@@ -74,7 +74,7 @@ class StoVolaMoMsc(object):
              V[t] * np.sqrt(self.dt) * ran[0, t, :])
         return S
     
-    def get_option_price(self, mul):
+    def get_option_price(self, mul=False):
         ''' 产生期权价格。
         
         Parameters
@@ -84,7 +84,7 @@ class StoVolaMoMsc(object):
             
         Returns
         =======
-        option_price : float
+        option_price_describe_list : float
             期权价格
         '''
         opl = []  # 用于储存每一次模拟的期权价格
@@ -94,13 +94,12 @@ class StoVolaMoMsc(object):
                 op = (np.exp(-self.r * self.dt * self.M) * 
                       np.sum(np.maximum(S[-1] - self.K, 0)) / self.I)
                 opl.append(op)
-            return opl
         else:
             for z in range(10):
                 S = self.get_underlying()
                 op = (np.exp(-self.r * self.dt * self.M) * 
                       np.sum(np.maximum(S[-1] - self.K, 0)) / self.I)
                 opl.append(op)
-            return opl
-        option_price = np.mean(opl)
-        return option_price
+        option_price_describe_list =  np.round([np.mean(opl), np.std(opl), 
+                                                np.max(opl), np.min(opl)], 6)
+        return option_price_describe_list
