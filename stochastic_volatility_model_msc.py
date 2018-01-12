@@ -69,6 +69,7 @@ class StoVolaMoMsc(object):
         ran_mat[0] = (ran_mat[0] - np.mean(ran_mat[0])) / np.std(ran_mat[0])
         ran_mat[1] = (ran_mat[1] - np.mean(ran_mat[1])) / np.std(ran_mat[1])
         ran_corr = np.zeros_like(ran_mat)
+        # 生成相关系数为rho的正态矩阵
         for t in range(self.M):
             ran_corr[:, t, :] = np.dot(cholesky_mat, ran_mat[:, t, :])
         return ran_corr
@@ -77,17 +78,19 @@ class StoVolaMoMsc(object):
         ''' 产生期权价格。'''
         dt = 1 / 252
         opl = [] # 用于储存每一次模拟的期权价格
+        Vo = np.zeros((self.M + 1, self.I))
+        So = np.zeros_like(Vo)
+        Vo[0] = self.V0
+        So[0] = self.S0
         for z in range(1000):
-            V = np.zeros((self.M + 1, self.I))
-            S = np.zeros((self.M + 1, self.I))
-            S[0] = self.S0
-            V[0] = self.V0
+            ran = self.get_random()
+            V = Vo
+            S = So
             for t in range(self.M):
-                ran = self.get_random()[:, t, :]
                 V[t + 1] = (V[t] + (self.kappa_v * (self.theta_v - V[t]) * dt + 
-                 self.sigma_v * np.sqrt(V[t]) * np.sqrt(dt) * ran[1]))
+                 self.sigma_v * np.sqrt(V[t]) * np.sqrt(dt) * ran[1, t, :]))
                 S[t + 1] = S[t] * np.exp((self.r - 0.5 * V[t]) *dt +
-                 V[t] * np.sqrt(dt) * ran[0])
+                 V[t] * np.sqrt(dt) * ran[0, t, :])
             op = (np.exp(-self.r * dt * self.M) * 
                   np.sum(np.maximum(S[-1] - self.K, 0)) / self.I)
             opl.append(op)
