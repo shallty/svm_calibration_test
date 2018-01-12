@@ -10,9 +10,9 @@ Created on Thu Jan 11 15:35:37 2018
 # stochastic_volatility_model_msc.py
 #
 import numpy as np
-import numpy.random as npr
 
 from .get_workday import get_workday
+from .gen_random import gen_2d_corr_random
 
 class StoVolaMoMsc(object):
     ''' 随机波动率模型期权定价。
@@ -53,45 +53,54 @@ class StoVolaMoMsc(object):
         self.kappa_v = kappa_v
         self.theta_v = theta_v
         self.sigma_v = sigma_v
+        # 直接对相关系数矩阵进行cholesky变换
         self.rho = rho
         self.K = K
         self.M = get_workday(startdate, enddate)
         self.dt = 1 / 252
         self.I = 100000
     
-    def get_random(self):
-        ''' 取得两个具有相关性的随机数矩阵。'''
-        # 两个随机变量的相关系数矩阵
-        corr_mat = np.array([[1, self.rho], [self.rho, 1]])
-        cholesky_mat = np.linalg.cholesky(corr_mat)  # 进行cholesky变换
-        ran_mat = npr.standard_normal((2, self.M, self.I))  # 生成随机数
-        # 应用方差缩减
-        ran_mat[0] = (ran_mat[0] - np.mean(ran_mat[0])) / np.std(ran_mat[0])
-        ran_mat[1] = (ran_mat[1] - np.mean(ran_mat[1])) / np.std(ran_mat[1])
-        ran_corr = np.zeros_like(ran_mat)
-        # 生成相关系数为rho的正态矩阵
+    def get_underlying(self):
+        ''' 构建标的资产的价格变动函数。'''
+        V = np.zeros((self.M + 1, self.I))
+        S = np.zeros_like(V)
+        V[0] = self.V0
+        S[0] = self.S0
+        ran = gen_2d_corr_random(self.rho, self.M, self.I)
         for t in range(self.M):
-            ran_corr[:, t, :] = np.dot(cholesky_mat, ran_mat[:, t, :])
-        return ran_corr
+            V[t + 1] = (V[t] + (self.kappa_v * (self.theta_v - V[t]) * self.dt 
+             + self.sigma_v * np.sqrt(V[t]) * np.sqrt(self.dt) * ran[1, t, :]))
+            S[t + 1] = S[t] * np.exp((self.r - 0.5 * V[t]) * self.dt + 
+             V[t] * np.sqrt(self.dt) * ran[0, t, :])
+        return S
     
-    def get_option_price(self):
-        ''' 产生期权价格。'''
-        dt = 1 / 252
-        opl = [] # 用于储存每一次模拟的期权价格
-        Vo = np.zeros((self.M + 1, self.I))
-        So = np.zeros_like(Vo)
-        Vo[0] = self.V0
-        So[0] = self.S0
-        for z in range(1000):
-            ran = self.get_random()
-            V = Vo
-            S = So
-            for t in range(self.M):
-                V[t + 1] = (V[t] + (self.kappa_v * (self.theta_v - V[t]) * dt + 
-                 self.sigma_v * np.sqrt(V[t]) * np.sqrt(dt) * ran[1, t, :]))
-                S[t + 1] = S[t] * np.exp((self.r - 0.5 * V[t]) *dt +
-                 V[t] * np.sqrt(dt) * ran[0, t, :])
-            op = (np.exp(-self.r * dt * self.M) * 
-                  np.sum(np.maximum(S[-1] - self.K, 0)) / self.I)
-            opl.append(op)
-        return np.mean(opl)
+    def get_option_price(self, mul):
+        ''' 产生期权价格。
+        
+        Parameters
+        ==========
+        mul : bool
+            是否进行多次循环
+            
+        Returns
+        =======
+        option_price : float
+            期权价格
+        '''
+        opl = []  # 用于储存每一次模拟的期权价格
+        if mul:
+            for z in range(1000):
+                S = self.get_underlying()
+                op = (np.exp(-self.r * self.dt * self.M) * 
+                      np.sum(np.maximum(S[-1] - self.K, 0)) / self.I)
+                opl.append(op)
+            return opl
+        else:
+            for z in range(10):
+                S = self.get_underlying()
+                op = (np.exp(-self.r * self.dt * self.M) * 
+                      np.sum(np.maximum(S[-1] - self.K, 0)) / self.I)
+                opl.append(op)
+            return opl
+        option_price = np.mean(opl)
+        return option_price
