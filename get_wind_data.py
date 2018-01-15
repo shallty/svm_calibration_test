@@ -40,13 +40,13 @@ def get_wind_optiondata(startdate, enddate):
     contract_data = pd.DataFrame()
     for i in range(len(odo1.Fields)):
         option_data[odo1.Fields[i]] = odo1.Data[i]
-    option_data.index = odo1.Data[0]
+    option_data.index = odo1.Data[0][0]
     
     for i in range(len(odo2.Fields)):
         contract_data[odo2.Fields[i]] = odo2.Data[i]
     
     temp1 = option_data[option_data.index == dt.strptime(startdate, '%Y-%m-%d')]
-    temp1['underlying'] = oetf1.Data[0]
+    temp1['underlying'] = oetf1.Data[0][0]
     temp2 = option_data[option_data.index == dt.strptime(enddate, '%Y-%m-%d')]
     temp2['underlying'] = oetf2.Data[0]
     ops = temp1.append(temp2, ignore_index=True)
