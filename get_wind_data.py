@@ -32,6 +32,8 @@ def get_wind_optiondata(startdate, enddate):
     w.start()
     getstr1 = "startdate=" + startdate + ";enddate=" + enddate + ";exchange=sse;windcode=510050.SH;field=date,option_code,option_name,close"
     getstr2 = "exchange=sse;windcode=510050.SH;status=all;field=wind_code,sec_name,exercise_price,listed_date,expire_date"
+    oetf1 = w.wsd("512510.SH", "close", startdate, startdate, "")
+    oetf2 = w.wsd("512510.SH", "close", enddate, enddate, "")
     odo1 = w.wset("optiondailyquotationstastics", getstr1)
     odo2 = w.wset("optioncontractbasicinfo", getstr2)
     option_data = pd.DataFrame()
@@ -44,7 +46,9 @@ def get_wind_optiondata(startdate, enddate):
         contract_data[odo2.Fields[i]] = odo2.Data[i]
     
     temp1 = option_data[option_data.index == dt.strptime(startdate, '%Y-%m-%d')]
+    temp1['underlying'] = oetf1.Data[0]
     temp2 = option_data[option_data.index == dt.strptime(enddate, '%Y-%m-%d')]
+    temp2['underlying'] = oetf2.Data[0]
     ops = temp1.append(temp2, ignore_index=True)
     contract_data.rename(columns={contract_data.columns[0] : 'option_code'}, 
                                   inplace=True)
