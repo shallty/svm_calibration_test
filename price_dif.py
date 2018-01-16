@@ -14,7 +14,7 @@ import numpy as np
 from .stochastic_volatility_model_msc import StoVolaMoMsc
 
 
-class caliboration_ins(object):
+class CalibrationIns(object):
     ''' 参数校准工具类。
     
     Methods
@@ -62,12 +62,12 @@ class caliboration_ins(object):
         for i in range(len(li)):
             self.mar_price.append(li[i])
     
-    def get_dif(self, kappa_v, theta_v, sigma_v, rho):
+    def get_dif(self, p):
         dif_t = []
         for i in range(len(self.mar_price)):
             dif = (self.mar_price[i] - StoVolaMoMsc(self.S0[i], self.r[i],
-                   self.V0[i], kappa_v, theta_v, sigma_v, rho, 
-                   self.add_strike_price[i], self.startdate[i],
+                   self.V0[i], p[1], p[2], p[3], p[4], 
+                   self.add_strike_price[i], self.startdate[i], 
                    self.enddate[i]).get_option_price()[0]) ** 2
             dif_t.append(dif)
         return np.mean(dif_t)

@@ -57,7 +57,7 @@ def get_wind_optiondata(startdate, enddate):
     option_data_set = option_data_set[option_data_set['call_or_put'] == '认购']
     return option_data_set
 
-def get_underlying_vol(startdate, enddate):
+def get_underlying_vol(enddate):
     ''' 利用Wind数据接口获取标的资产市场波动率。
     
     Parameters
@@ -72,11 +72,16 @@ def get_underlying_vol(startdate, enddate):
     volatility : float
         包含收盘价及到期日等信息的期权数据集
     '''
+    from datetime import datetime as dt
+    from datetime import timedelta
+    ed = dt.strptime(enddate, '%Y-%m-%d')
+    sd = ed - timedelta(days=365)
+    startdate = dt.strftime(sd, '%Y-%m-%d')
     w.start()
     oetf = w.wsd("510050.SH", "close", startdate, enddate, "")
     etf_close = pd.DataFrame()
     etf_close['close'] = oetf.Data[0]
     etf_close['log_ret'] = (np.log(etf_close['close']) - 
-             np.log(etf_close['close'].shift(-1)))
+             np.log(etf_close['close'].shift(1)))
     volatility = np.std(etf_close['log_ret'])
     return volatility

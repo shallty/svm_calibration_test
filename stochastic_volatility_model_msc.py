@@ -95,11 +95,10 @@ class StoVolaMoMsc(object):
                       np.sum(np.maximum(S[-1] - self.K, 0)) / self.I)
                 opl.append(op)
         else:
-            for z in range(10):
-                S = self.get_underlying()
-                op = (np.exp(-self.r * self.dt * self.M) * 
-                      np.sum(np.maximum(S[-1] - self.K, 0)) / self.I)
-                opl.append(op)
+            S = self.get_underlying()
+            op = (np.exp(-self.r * self.dt * self.M) * 
+                  np.sum(np.maximum(S[-1] - self.K, 0)) / self.I)
+            opl.append(op)
         option_price_describe_list =  np.round([np.mean(opl), np.std(opl), 
                                                 np.max(opl), np.min(opl)], 6)
         return option_price_describe_list
