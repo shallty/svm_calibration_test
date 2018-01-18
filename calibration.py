@@ -30,30 +30,32 @@ class Calibrate(object):
         self.dif_class = price_dif_class
         
     def loc_fmin(self):
-        locmin = spo.brute(self.dif_class.get_dif, ((0, 5.1, 0.5), 
-                                                    (0, 1.1, 0.1), 
-                                                    (0, 1.1, 0.1),
-                                                    (-1, 1.1, 0.2)), finish=None)
+        locmin = spo.brute(self.dif_class.get_dif, ((1, 5.1, 0.5), 
+                                                    (0.1, 1.1, 0.1), 
+                                                    (0.1, 1.1, 0.1),
+                                                    (-0.99, 0.99, 0.19)), finish=None)
         return locmin
     
     def opti_param(self, initial_list):
+        bnds = ((0, 6), (0, 1), (0, 1), (-0.99, 0.99))
         globalmin = spo.minimize(self.dif_class.get_dif, initial_list, 
-                                 method='BFGS')
+                                 method='L-BFGS-B', bounds=bnds, 
+                                 options={'disp': True})
         if globalmin.success:
             print('参数校准最优化成功！')
             print('最优均方误差：%8.9f' % globalmin.fun)
-            print('kappa_v: %8.9f' % globalmin.x[0])
-            print('theta_v: %8.9f' % globalmin.x[1])
-            print('sigma_v: %8.9f' % globalmin.x[2])
-            print('rho: %8.9f' % globalmin.x[3])
+            print('kappa_v: %8.4f' % globalmin.x[0])
+            print('theta_v: %8.4f' % globalmin.x[1])
+            print('sigma_v: %8.4f' % globalmin.x[2])
+            print('rho: %8.4f' % globalmin.x[3])
             return globalmin.x
         else:
             print('参数校准失败，请重新设定起始参数！')
             print(globalmin.message)
             print('终止校准均方误差：%8.9f' % globalmin.fun)
             print('建议起始参数：')
-            print('kappa_v: %8.9f' % globalmin.x[0])
-            print('theta_v: %8.9f' % globalmin.x[1])
-            print('sigma_v: %8.9f' % globalmin.x[2])
-            print('rho: %8.9f' % globalmin.x[3])
+            print('kappa_v: %8.4f' % globalmin.x[0])
+            print('theta_v: %8.4f' % globalmin.x[1])
+            print('sigma_v: %8.4f' % globalmin.x[2])
+            print('rho: %8.4f' % globalmin.x[3])
             return globalmin.x

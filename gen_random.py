@@ -27,7 +27,8 @@ def gen_2d_corr_random(rho, M, I):
     '''
     corr_mat = np.array([[1, rho], [rho, 1]])
     cholesky_mat = np.linalg.cholesky(corr_mat)
-    ran_mat = npr.standard_normal((2, M, I))
+    ran_mat_pre = npr.standard_normal((2, M, I))
+    ran_mat = (ran_mat_pre - np.mean(ran_mat_pre)) / np.std(ran_mat_pre)
     for t in range(M):
         ran_mat[:, t, :] = np.dot(cholesky_mat, ran_mat[:, t, :])
     return ran_mat

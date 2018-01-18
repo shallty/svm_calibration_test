@@ -60,21 +60,24 @@ class StoVolaMoMsc(object):
         self.dt = 1 / 252
         self.I = 100000
     
-    def get_underlying(self):
+    def get_underlying(self, fixseed=False):
         ''' 构建标的资产的价格变动函数。'''
         V = np.zeros((self.M + 1, self.I))
         S = np.zeros_like(V)
         V[0] = self.V0
         S[0] = self.S0
+        if fixseed:
+            np.random.seed(2000)
         ran = gen_2d_corr_random(self.rho, self.M, self.I)
         for t in range(self.M):
-            V[t + 1] = (V[t] + (self.kappa_v * (self.theta_v - V[t]) * self.dt 
-             + self.sigma_v * np.sqrt(V[t]) * np.sqrt(self.dt) * ran[1, t, :]))
-            S[t + 1] = S[t] * np.exp((self.r - 0.5 * V[t]) * self.dt + 
-             V[t] * np.sqrt(self.dt) * ran[0, t, :])
+            vpos = np.maximum(V[t], 0)
+            V[t + 1] = (V[t] + (self.kappa_v * (self.theta_v - vpos) * self.dt 
+             + self.sigma_v * np.sqrt(vpos) * np.sqrt(self.dt) * ran[1, t, :]))
+            S[t + 1] = S[t] * np.exp((self.r - 0.5 * vpos) * self.dt + 
+             np.sqrt(vpos) * np.sqrt(self.dt) * ran[0, t, :])
         return S
     
-    def get_option_price(self, mul=False):
+    def get_option_price(self, fixseed=False, mul=False):
         ''' 产生期权价格。
         
         Parameters
@@ -87,18 +90,19 @@ class StoVolaMoMsc(object):
         option_price_describe_list : float
             期权价格
         '''
-        opl = []  # 用于储存每一次模拟的期权价格
         if mul:
+            opl = []  # 用于储存每一次模拟的期权价格
             for z in range(1000):
-                S = self.get_underlying()
+                S = self.get_underlying(fixseed)
                 op = (np.exp(-self.r * self.dt * self.M) * 
                       np.sum(np.maximum(S[-1] - self.K, 0)) / self.I)
                 opl.append(op)
+            option_price_describe = np.round([np.mean(opl), np.std(opl), 
+                                              np.max(opl), np.min(opl)], 6)
+            return option_price_describe
         else:
-            S = self.get_underlying()
+            S = self.get_underlying(fixseed)
             op = (np.exp(-self.r * self.dt * self.M) * 
                   np.sum(np.maximum(S[-1] - self.K, 0)) / self.I)
-            opl.append(op)
-        option_price_describe_list =  np.round([np.mean(opl), np.std(opl), 
-                                                np.max(opl), np.min(opl)], 6)
-        return option_price_describe_list
+            return [op]
+        

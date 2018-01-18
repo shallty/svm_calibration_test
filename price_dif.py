@@ -66,8 +66,11 @@ class CalibrationIns(object):
         dif_t = []
         for i in range(len(self.mar_price)):
             dif = (self.mar_price[i] - StoVolaMoMsc(self.S0[i], self.r[i],
-                   self.V0[i], p[1], p[2], p[3], p[4], 
-                   self.add_strike_price[i], self.startdate[i], 
-                   self.enddate[i]).get_option_price()[0]) ** 2
+                   self.V0[i], p[0], p[1], p[2], p[3], self.strike_price[i], 
+                   self.startdate[i], self.enddate[i]).get_option_price(
+                           fixseed=True)[0]) ** 2
             dif_t.append(dif)
-        return np.mean(dif_t)
+        z = np.mean(dif_t)
+        print('%8.3f, %8.3f, %8.3f, %8.3f; outcome=%8.6f' % (p[0], p[1], p[2], 
+                                                             p[3], z))
+        return z
