@@ -43,6 +43,7 @@ class Calibrate(object):
                                  options={'disp': True})
         if globalmin.success:
             print('参数校准最优化成功！')
+            print(globalmin.message)
             print('最优均方误差：%8.9f' % globalmin.fun)
             print('kappa_v: %8.4f' % globalmin.x[0])
             print('theta_v: %8.4f' % globalmin.x[1])
