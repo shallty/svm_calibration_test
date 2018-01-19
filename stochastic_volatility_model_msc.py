@@ -61,7 +61,13 @@ class StoVolaMoMsc(object):
         self.I = 100000
     
     def get_underlying(self, fixseed=False):
-        ''' 构建标的资产的价格变动函数。'''
+        ''' 构建标的资产的价格变动函数。
+        
+        Parameters
+        ==========
+        fixseed : bool
+            是否设定随机数种子
+        '''
         V = np.zeros((self.M + 1, self.I))
         S = np.zeros_like(V)
         V[0] = self.V0
@@ -82,6 +88,8 @@ class StoVolaMoMsc(object):
         
         Parameters
         ==========
+        fixseed : bool
+            是否设定随机数种子
         mul : bool
             是否进行多次循环
             

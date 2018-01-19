@@ -62,15 +62,13 @@ def get_underlying_vol(enddate):
     
     Parameters
     ==========
-    startdate : str
-        行情数据开始日期
     enddate : str
         行情数据结束日期
     
-    Results
+    Returns
     =======
     volatility : float
-        包含收盘价及到期日等信息的期权数据集
+        标的资产传入参数日期为止的一年期历史对数收益率波动率
     '''
     from datetime import datetime as dt
     from datetime import timedelta

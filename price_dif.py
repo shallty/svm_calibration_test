@@ -19,8 +19,20 @@ class CalibrationIns(object):
     
     Methods
     =======
-    add_** :
-        向容器中添加相应的市场数据  
+    add_underlying : pandas.Series
+        向容器中添加标的资产市场价格数据
+    add_volatility : pandas.Series
+        向容器中添加标的资产历史波动率数据
+    add_strike_price : pandas.Series
+        向容器中添加期权行权价格数据
+    add_startdate : pandas.Series
+        向容器中添加期权合约市场数据获取日期
+    add_enddate : pandas.Series
+        向容器中添加期权合约到期日
+    add_rate : pandas.Series
+        向容器中添加市场实际无风险一年期利率（shibor）
+    add_mar_price : pandas.Series
+        向容器中添加期权合约市场价格
     get_dif :
         取得不同参数下模拟数据与市场实际价格均方误差
     '''
