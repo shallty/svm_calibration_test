@@ -126,7 +126,7 @@ pycrypto==2.6.1
 pycurl==7.43.0
 pyface==5.1.0
 pyflakes==1.6.0
-Pygments==2.2.0
+Pygments==2.7.4
 pygpu==0.6.9
 pylint==1.7.4
 pymc==2.3.6
